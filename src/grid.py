@@ -1,6 +1,9 @@
 from agent import Agent
 from goal import Goal
 import math
+import matplotlib.pyplot as plt
+import numpy as np
+
 
 # TODO : Improve method documentation
 class Grid:
@@ -119,13 +122,149 @@ class Grid:
 
     def visualize(self):
         # Visualizes current grid
-        pass
+        l_x=[]
+        l_y=[]
+        g_x=[]
+        g_y=[]
+        numGoals=len(goals)
+        numAgents=len(agents)
 
-    def print(self):
-        print('Agents: ')
-        [agent.print() for agent in self.agents]
-        print('Goals: ')
-        [goal.print() for goal in self.goals]
+        for agent in agents:
+            l_x.append(agent.pos_x)
+            l_y.append(agent.pos_y)
+        for goal in goals:
+            g_x.append(goal.pos_x)
+            g_y.append(goal.pos_y)
+        alabels=[]
+        glabels=[]
+        
+        gloc=[]
+        for i in range(numGoals):
+            gloc.append((g_x[i],g_y[i]))
+        aloc=[]
+        for i in range(numAgents):
+            aloc.append((l_x[i],l_y[i]))
+        gloc_s = set(gloc)
+        aloc_s = set(aloc)
+        acount=[]
+        gcount=[]
+        for i in range(len(gloc_s)):
+            gcount.append(gloc.count(list(gloc_s)[i])*5)
+        for i in range(len(aloc_s)):
+            acount.append(aloc.count(list(aloc_s)[i])*5)
+        loc_s=gloc_s.union(aloc_s)
+
+        gloc_x=[]
+        gloc_y=[]
+        aloc_x=[]
+        aloc_y=[]
+
+        gloc_s=list(gloc_s)
+        aloc_s=list(aloc_s)
+        for i in gloc_s:
+            gloc_x.append(i[0])
+            gloc_y.append(i[1])
+        for i in aloc_s:
+            aloc_x.append(i[0])
+            aloc_y.append(i[1])
+
+
+        for i in aloc_s:
+            lab_a=""
+            
+            for j in range(len(aloc)):
+                if i==aloc[j]:
+                    lab_a+="A"
+                    lab_a+=str(j)
+                    lab_a+=","
+            alabels.append(lab_a)
+        for i in gloc_s:
+            
+            lab_g=""
+            for j in range(len(gloc)):
+                if i == gloc[j]:
+                    lab_g+="G"
+                    lab_g+=str(j)
+                    lab_g+=","
+            if i in aloc_s:
+                lab_g+=alabels[aloc_s.index(i)]
+            glabels.append(lab_g)
+
+
+        
+        names=np.array(alabels)
+        names1=np.array(glabels)
+        fig, ax=plt.subplots()
+        sc = plt.scatter(aloc_x,aloc_y,c='red',s=acount)
+        sc1 = plt.scatter(gloc_x,gloc_y,c='blue',s=gcount)
+        annot = ax.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",bbox=dict(boxstyle="round", fc="w"),arrowprops=dict(arrowstyle="->"))
+        annot.set_visible(False)
+
+        def update_annot(ind):
+
+            pos = sc.get_offsets()[ind["ind"][0]]
+            annot.xy = pos
+            '''
+            text = "{}, {}".format(" ".join(list(map(str,ind["ind"]))), 
+                                " ".join([names[n] for n in ind["ind"]]))
+            '''
+            text = "Goals/Agents: {}".format(" ".join([names[n] for n in ind["ind"]]))
+            #----------
+            
+            annot.set_text(text)
+            #annot.get_bbox_patch().set_facecolor(cmap(norm(c[ind["ind"][0]])))
+            annot.get_bbox_patch().set_alpha(0.4)
+
+        def update_annot1(ind):
+
+            pos = sc1.get_offsets()[ind["ind"][0]]
+            annot.xy = pos
+            '''
+            text = "{}, {}".format(" ".join(list(map(str,ind["ind"]))), 
+                                " ".join([names[n] for n in ind["ind"]]))
+            '''
+            text = "Goals/Agents: {}".format(" ".join([names1[n] for n in ind["ind"]]))
+            #----------
+            
+            annot.set_text(text)
+            #annot.get_bbox_patch().set_facecolor(cmap(norm(c[ind["ind"][0]])))
+            annot.get_bbox_patch().set_alpha(0.4)
+        def hover(event):
+            vis = annot.get_visible()
+            if event.inaxes == ax:
+                cont, ind = sc.contains(event)
+                if cont:
+                    update_annot(ind)
+                    annot.set_visible(True)
+                    fig.canvas.draw_idle()
+                else:
+                    if vis:
+                        annot.set_visible(False)
+                        fig.canvas.draw_idle()
+                cont, ind = sc1.contains(event)
+                if cont:
+                    update_annot1(ind)
+                    annot.set_visible(True)
+                    fig.canvas.draw_idle()
+                else:
+                    if vis:
+                        annot.set_visible(False)
+                        fig.canvas.draw_idle()
+
+        fig.canvas.mpl_connect("motion_notify_event", hover)
+                
+        plt.title('Location of Agents and Goals')
+        plt.xticks(range(n))
+        plt.yticks(range(n))
+        plt.grid()
+        plt.legend(loc=2)
+        plt.show()
+
+def print(self):
+    print('Agents: ')
+    [agent.print() for agent in self.agents]
+    print('Goals: ')
+    [goal.print() for goal in self.goals]
 
 if __name__ == '__main__':
     # Test this class
