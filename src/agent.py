@@ -8,6 +8,7 @@ class Agent:
         self.cur_filled_capacity = cur_filled_capacity
     
     def move(self, pos_x, pos_y, cur_cost = 0):
+        # TODO : Currently not being called. Need to call
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.cur_cost = cur_cost
