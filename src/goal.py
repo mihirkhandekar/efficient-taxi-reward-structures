@@ -7,4 +7,8 @@ class Goal:
     
     def get_reward(self):
         # Return reward, which is a function of capacity
+
         pass
+
+    def print(self):
+        print('Goal {} at ({}, {}) : Cap {}'.format(self.id, self.pos_x, self.pos_y, self.capacity))
