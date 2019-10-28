@@ -28,16 +28,16 @@ class Grid:
                 index += 1
 
 
-    def move(self, agents, directions):
+    def move(self, agents, directions, goals):
         '''
-            Move list of [agents] in [directions]
+            Move list of [agents] in [directions] to [goals]
         '''
-        self.__validate_move(agents, directions)
+        self.__validate_move(agents, directions, goals)
 
         # Call __get_cost method for agent and direction. Update cur_cost for agent, increments time and return new_grid
         # TODO : Validate if action valid at that position
 
-        new_agents = self.__update_agent_position_and_cost(agents, directions)
+        new_agents = self.__update_agent_position_and_cost(agents, directions, goals)
 
         self.__merge_new_agent_positions_with_existing(new_agents)
 
@@ -57,10 +57,16 @@ class Grid:
                 new_agents.append(agent)
                 modified_positions.append(agent.id)
 
-    def __update_agent_position_and_cost(self, agents, directions):
+    def __update_agent_position_and_cost(self, agents, directions, goals):
         new_agents = []
 
-        for agent, direction in zip(agents, directions):
+        for agent, direction, goal in zip(agents, directions, goals):
+            if agent.hide:
+                agent.decrement_hide()
+                continue
+
+            self.update_agent_at_goal_state(agent, goal, goals)
+
             if 'UP' in direction:
                 agent.pos_x += 1
             if 'DOWN' in direction:
@@ -69,21 +75,35 @@ class Grid:
                 agent.pos_y -= 1
             if 'RIGHT' in direction:
                 agent.pos_y += 1
-
-            agent.cur_cost += self.__get_cost(agent, direction)
+            if direction != 'STAY':
+                agent.cur_cost += self.__get_cost(agent, direction)
 
             new_agents.append(agent)
             return new_agents
 
-    def __validate_move(self, agents, directions):
-        if len(agents) != len(directions):
+    def update_agent_at_goal_state(self, agent, goal, goals):
+        # TODO : Rewrite this complex logic. If agent at goal state, stays hidden and reappears randomly. 
+        if agent.pos_x == goal.pos_x and agent.pos_y == goal.pos_y:
+            capacity_utilization = abs(agent.capacity - goal.capacity)
+            agent.cur_filled_capacity = capacity_utilization
+
+            agent.decrement_hide()
+            agent.hide = True
+
+            if capacity_utilization >= goal.capacity:
+                goals.remove(goal)
+            else:
+                goal.capacity -= capacity_utilization
+
+    def __validate_move(self, agents, directions, goals):
+        if len(agents) != len(directions) or len(agents) != len(goals):
             raise ValueError(
                 'Number of agents should be equal to number of directions')
 
         # TODO : Use enum for directions
         for direction in directions:
-            if direction not in ['UP', 'DOWN', 'LEFT', 'RIGHT', 'UP_LEFT', 'UP_RIGHT', 'DOWN_LEFT', 'DOWN_RIGHT']:
-                raise ValueError('Invalid direction')
+            if direction not in ['UP', 'DOWN', 'LEFT', 'RIGHT', 'UP_LEFT', 'UP_RIGHT', 'DOWN_LEFT', 'DOWN_RIGHT', 'STAY']:
+                raise ValueError('Invalid direction ', direction)
 
         for agent, direction in zip(agents, directions):
             if (agent.pos_x == 0 and 'DOWN' in direction) or (agent.pos_y == 0 and 'LEFT' in direction) or (agent.pos_x == self.grid_height - 1 and 'UP' in direction) or (agent.pos_y == self.grid_width - 1 and 'RIGHT' in direction):
@@ -111,12 +131,13 @@ if __name__ == '__main__':
     # Test this class
     agent1 = Agent(pos_x = 0, pos_y = 0, capacity=10)
     agent2 = Agent(pos_x = 1, pos_y = 3, capacity=10)
-    goal = Goal(pos_x = 5, pos_y = 5, capacity=10)
+    goal1 = Goal(pos_x = 5, pos_y = 5, capacity=10)
+    goal2 = Goal(pos_x = 5, pos_y = 5, capacity=10)
 
-    grid = Grid(agents=[agent1, agent2], goals=[goal])
+    grid = Grid(agents=[agent1, agent2], goals=[goal1, goal2])
     print('Initial grid')
     grid.print()
-    grid = grid.move([agent1], ['UP'])
+    grid = grid.move([agent1], ['UP'], [goal1])
     print('Final grid')
     grid.print()
 
