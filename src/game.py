@@ -1,6 +1,9 @@
 from strategy.greedy_strategy import GreedyStrategy
 from strategy.nash_strategy import NashStrategy
 
+GRID_SIZE = 25
+INITIAL_AGENTS = 10
+INITIAL_GOALS = 10
 
 class Game:
     def __init__(self, agents, goals, strategy=GreedyStrategy()):

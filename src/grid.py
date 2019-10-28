@@ -8,9 +8,24 @@ class Grid:
         #TODO : Validate initial positions of agents and goals
         self.grid_height = grid_height
         self.grid_width = grid_width
+        self.__add_default_ids(agents, goals)
         self.agents = agents
         self.goals = goals
         self.time = time
+
+    def __add_default_ids(self, agents, goals):
+        index = 0
+        blank_agents = sum([agent.id == None for agent in agents])
+        blank_goals = sum([goal.id == None for goal in goals])
+        if blank_agents > 0:
+            for agent in agents:
+                agent.id = index
+                index += 1
+        index = 0
+        if blank_goals > 0:
+            for goal in goals:
+                goal.id = index
+                index += 1
 
 
     def move(self, agents, directions):
@@ -94,13 +109,14 @@ class Grid:
 
 if __name__ == '__main__':
     # Test this class
-    agent = Agent(pos_x = 0, pos_y = 0, id = 0, capacity=10)
-    goal = Goal(pos_x = 5, pos_y = 5, id = 0, capacity=10)
+    agent1 = Agent(pos_x = 0, pos_y = 0, capacity=10)
+    agent2 = Agent(pos_x = 1, pos_y = 3, capacity=10)
+    goal = Goal(pos_x = 5, pos_y = 5, capacity=10)
 
-    grid = Grid(agents=[agent], goals=[goal])
+    grid = Grid(agents=[agent1, agent2], goals=[goal])
     print('Initial grid')
     grid.print()
-    grid = grid.move([agent], ['UP'])
+    grid = grid.move([agent1], ['UP'])
     print('Final grid')
     grid.print()
 
