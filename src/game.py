@@ -63,7 +63,8 @@ class Game:
 
     def visualize(self):
         # Visualize all grids over time T
-        pass
+        for tgrid in greedy_game.time_grid:
+            tgrid.visualize()
 
     def summary(self):
         # Show total utility and agent-specific utility
@@ -104,5 +105,6 @@ if __name__ == '__main__':
     nash_game = Game(init_grid, strategy=NashStrategy())
     epsilon = 0.000001
     print('Greedy Game :' , greedy_game.summary())
+    greedy_game.visualize()
     print('Nash Game :' , nash_game.summary())
     print('Price of Anarchy : ', greedy_game.current_utility / (nash_game.current_utility + epsilon))

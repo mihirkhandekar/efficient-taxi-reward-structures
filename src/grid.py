@@ -126,13 +126,13 @@ class Grid:
         l_y=[]
         g_x=[]
         g_y=[]
-        numGoals=len(goals)
-        numAgents=len(agents)
+        numGoals=len(self.goals)
+        numAgents=len(self.agents)
 
-        for agent in agents:
+        for agent in self.agents:
             l_x.append(agent.pos_x)
             l_y.append(agent.pos_y)
-        for goal in goals:
+        for goal in self.goals:
             g_x.append(goal.pos_x)
             g_y.append(goal.pos_y)
         alabels=[]
@@ -254,8 +254,8 @@ class Grid:
         fig.canvas.mpl_connect("motion_notify_event", hover)
                 
         plt.title('Location of Agents and Goals')
-        plt.xticks(range(n))
-        plt.yticks(range(n))
+        plt.xticks(range(self.grid_width))
+        plt.yticks(range(self.grid_height))
         plt.grid()
         plt.legend(loc=2)
         plt.show()
