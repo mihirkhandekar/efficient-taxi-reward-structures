@@ -260,11 +260,11 @@ class Grid:
         plt.legend(loc=2)
         plt.show()
 
-def print(self):
-    print('Agents: ')
-    [agent.print() for agent in self.agents]
-    print('Goals: ')
-    [goal.print() for goal in self.goals]
+    def print(self):
+        print('Agents: ')
+        [agent.print() for agent in self.agents]
+        print('Goals: ')
+        [goal.print() for goal in self.goals]
 
 if __name__ == '__main__':
     # Test this class
