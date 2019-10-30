@@ -7,8 +7,8 @@ class Agent:
         self.cur_cost = cur_cost
         self.id = id            #TODO : Global control of ID assignment
         self.cur_filled_capacity = cur_filled_capacity
-        self.hide = self.HIDE
-        self.hide = False
+        self.hide_timeout = self.HIDE
+        self.hidden = False
     
     def move(self, pos_x, pos_y, cur_cost = 0):
         # TODO : Currently not being called. Need to call
@@ -17,14 +17,18 @@ class Agent:
         self.cur_cost = cur_cost
     
     def decrement_hide(self):
-        self.hide -= 1
-        if self.hide == 0:
+        reappear = True
+        self.hide_timeout -= 1
+        if self.hide_timeout == 0:
             self.reset_hide()
+            return reappear
+        return ~reappear
     
     def reset_hide(self):
-        self.hide = self.HIDE
-        self.hide = False
+        self.hide_timeout = self.HIDE
+        self.cur_filled_capacity = 0
+        self.hidden = False
     
 
-    def print(self):
-        print('Agent {} at ({}, {}) : Cap {}/{} : Current Cost {}'.format(self.id, self.pos_x, self.pos_y, self.cur_filled_capacity, self.capacity, self.cur_cost))
+    def summary(self):
+        return ('Agent {} at ({}, {}) : Cap {}/{} : Current Cost {} '.format(self.id, self.pos_x, self.pos_y, self.cur_filled_capacity, self.capacity, self.cur_cost))

@@ -17,8 +17,8 @@ class Goal:
         distance = np.random.normal(loc=self.MEDIAN_DISTANCE, scale=3, size=units)
         return int(np.sum(self.UNIT_REWARD * units * distance))
 
-    def print(self):
-        print('Goal {} at ({}, {}) : Cap {}'.format(self.id, self.pos_x, self.pos_y, self.capacity))
+    def summary(self):
+        return ('Goal {} at ({}, {}) : Cap {}'.format(self.id, self.pos_x, self.pos_y, self.capacity))
 
 if __name__ == '__main__':
     goal = Goal(0, 0, 0)
