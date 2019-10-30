@@ -151,7 +151,8 @@ class Grid:
         gloc=[]
 
         for agent in self.agents:
-            aloc.append((agent.pos_x,agent.pos_y))
+            if not agent.hidden:
+                aloc.append((agent.pos_x,agent.pos_y))
         for goal in self.goals:
             gloc.append((goal.pos_x,goal.pos_y))
     
@@ -185,7 +186,7 @@ class Grid:
             
             for agent in self.agents:
                 
-                if agent.pos_x==i[0] and agent.pos_y==i[1]:
+                if agent.pos_x==i[0] and agent.pos_y==i[1] and agent.hidden==False:
                     
                     lab_a+="A"
                     lab_a+=str(agent.id)
