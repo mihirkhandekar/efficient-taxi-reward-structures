@@ -8,28 +8,13 @@ import copy
 
 # TODO : Improve method documentation
 class Grid:
-    def __init__(self, time=0, grid_height=25, grid_width=25, agents=[], goals=[]):
+    def __init__(self, time=0, grid_height=25, grid_width=25, agents=[], goals=[], first=False):
         #TODO : Validate initial positions of agents and goals
         self.grid_height = grid_height
         self.grid_width = grid_width
-        self.__add_default_ids(agents, goals)
         self.agents = agents
         self.goals = goals
         self.time = time
-
-    def __add_default_ids(self, agents, goals):
-        index = 0
-        blank_agents = sum([agent.id == None for agent in agents])
-        blank_goals = sum([goal.id == None for goal in goals])
-        if blank_agents > 0:
-            for agent in agents:
-                agent.id = index
-                index += 1
-        index = 0
-        if blank_goals > 0:
-            for goal in goals:
-                goal.id = index
-                index += 1
 
 
     def move(self, agents, directions, goals):
@@ -41,13 +26,33 @@ class Grid:
         # Call __get_cost method for agent and direction. Update cur_cost for agent, increments time and return new_grid
         # TODO : Validate if action valid at that position
 
-        new_agents = self.__update_agent_position_and_cost(agents, directions, goals)
+        new_agents, updated_goals = self.__update_agent_position_and_cost(agents, directions, goals)
+
+        self.__update_goals(updated_goals, goals)
 
         self.__merge_new_agent_positions_with_existing(new_agents)
 
         new_grid = Grid(self.time + 1, self.grid_height,
                         self.grid_width, new_agents, self.goals)
         return new_grid
+
+    def __update_goals(self, updated_goals, goals):
+        print('Before')
+        [goal.print() for goal in self.goals]
+        for updated_goal, capacity in updated_goals.items():
+            print(updated_goal, capacity)
+            if capacity == None or capacity <= 0:
+                for goal in self.goals:
+                    if goal.id == updated_goal.id:
+                        print("RGOAL")
+                        self.goals.remove(goal)
+            else:
+                for goal in self.goals:
+                    if goal.id == updated_goal.id:
+                        print("UGOAL")
+                        goal.capacity = capacity
+        print('After')
+        [goal.print() for goal in self.goals]
 
     def __get_cost(self, agent, direction):
         # This method gets cost for agent to move 1 step in a direction
@@ -64,15 +69,15 @@ class Grid:
     def __update_agent_position_and_cost(self, agents, directions, goals):
         new_agents = []
 
-
+        all_updated_goals = {}
         for agent, direction, goal in zip(agents, directions, goals):
             #if agent.hide:
             #    agent.decrement_hide()
             #    continue
 
-            self.update_agent_at_goal_state(agent, goal, goals)
+            updated_goals = self.update_agent_at_goal_state(agent, goal, goals)
+            all_updated_goals.update(updated_goals)
             init_position = agent.pos_x, agent.pos_y
-
             if 'UP' in direction:
                 agent.pos_x += 1
             if 'DOWN' in direction:
@@ -86,21 +91,28 @@ class Grid:
 
             print('Agent {} moved from {},{} to {},{} (dir {} cost {} +{})'.format(agent.id, init_position[0], init_position[1], agent.pos_x, agent.pos_y, direction, agent.cur_cost, self.__get_cost(agent, direction)))
             new_agents.append(agent)
-        return new_agents
+        return new_agents, all_updated_goals
 
     def update_agent_at_goal_state(self, agent, goal, goals):
         # TODO : Rewrite this complex logic. If agent at goal state, stays hidden and reappears randomly. 
+        updated_goals = {}
         if agent.pos_x == goal.pos_x and agent.pos_y == goal.pos_y:
             capacity_utilization = abs(agent.capacity - goal.capacity)
             agent.cur_filled_capacity = capacity_utilization
-
+            print('Agent {} at goal {}'.format(agent.id, goal.id))
             #agent.decrement_hide()
             #agent.hide = True
 
             if capacity_utilization >= goal.capacity:
+                print('Removing goal')
                 goals.remove(goal)
+                updated_goals[goal] = None
             else:
+                print('Reducing goal capacity')
                 goal.capacity -= capacity_utilization
+                updated_goals[goal] = goal.capacity
+        print('Updated goals', updated_goals)
+        return updated_goals
 
     def __validate_move(self, agents, directions, goals):
         if len(agents) != len(directions) or len(agents) != len(goals):
@@ -277,7 +289,7 @@ if __name__ == '__main__':
     goal1 = Goal(pos_x = 5, pos_y = 5, capacity=10)
     goal2 = Goal(pos_x = 5, pos_y = 5, capacity=10)
 
-    grid = Grid(agents=[agent1, agent2], goals=[goal1, goal2])
+    grid = Grid(agents=[agent1, agent2], goals=[goal1, goal2], first=True)
     print('Initial grid')
     grid.print()
     grid = grid.move([agent1], ['UP'], [goal1])

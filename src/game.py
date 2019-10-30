@@ -33,6 +33,7 @@ class Game:
         while(len(grid.goals) > 0 and time < TIMEOUT):
             print('Time ', time)
             time += 1
+            prev_grid = copy.copy(grid)
             agent_assignments = self.strategy.get_strategy(grid)
             directions = []
             agents = []
@@ -62,7 +63,7 @@ class Game:
             print('Moving {} agents'.format(len(agents)))
             grid = grid.move(agents, directions, goals)
             print('Grid : ', grid.print())
-            self.time_grid.append(copy.copy(grid))
+            self.time_grid.append(copy.copy(prev_grid))
 
     def visualize(self):
         # Visualize all grids over time T
@@ -77,30 +78,31 @@ class Game:
 def initialize_agents():
     np.random.seed(SEED_AGENT)
     agents = []
-    for _ in range(INITIAL_AGENTS):
+    for i in range(INITIAL_AGENTS):
         pos_x = np.random.randint(0, GRID_HEIGHT)
         pos_y = np.random.randint(0, GRID_WIDTH)
-        agent = Agent(pos_x, pos_y, capacity=np.random.randint(1, MAX_AGENT_CAPACITY))
+        agent = Agent(pos_x, pos_y, id=i, capacity=np.random.randint(1, MAX_AGENT_CAPACITY))
         agents.append(agent)
     return agents
 
 def initialize_goals():
     np.random.seed(SEED_GOAL)
     goals = []
-    for _ in range(INITIAL_GOALS):
+    for i in range(INITIAL_GOALS):
         pos_x = np.random.randint(0, GRID_HEIGHT)
         pos_y = np.random.randint(0, GRID_WIDTH)
-        goal = Goal(pos_x, pos_y, capacity=np.random.randint(1, MAX_GOAL_CAPACITY))
+        goal = Goal(pos_x, pos_y, id=i, capacity=np.random.randint(1, MAX_GOAL_CAPACITY))
         goals.append(goal)
     return goals
 
 def initialize_grid(init_agents, goals):
-    return Grid(grid_height=GRID_HEIGHT, grid_width=GRID_WIDTH, agents=init_agents, goals=goals)
+    return Grid(grid_height=GRID_HEIGHT, grid_width=GRID_WIDTH, agents=init_agents, goals=goals, first=True)
     
 
 if __name__ == '__main__':
     init_agents = initialize_agents()
     goals = initialize_goals()
+    [goal.print() for goal in goals]
     init_grid = initialize_grid(init_agents, goals)
     greedy_game = Game(init_grid, strategy=GreedyStrategy())
     greedy_game.generate_strategy_over_time()
