@@ -14,7 +14,7 @@ MAX_AGENT_CAPACITY = 5
 MAX_GOAL_CAPACITY = 5
 
 SEED_AGENT = 7
-SEED_GOAL = 7
+SEED_GOAL = 8
 
 TIMEOUT = 20
 
@@ -33,11 +33,11 @@ class Game:
         while(len(grid.goals) > 0 and time < TIMEOUT):
             print('Time ', time)
             time += 1
-            goal_assignments = self.strategy.get_strategy(grid)
+            agent_assignments = self.strategy.get_strategy(grid)
             directions = []
             agents = []
             goals = []
-            for goal, agent in goal_assignments.items():
+            for agent, goal in agent_assignments.items():
                 if goal != None:
                     if agent.pos_x < goal.pos_x and agent.pos_y < goal.pos_y:
                         directions.append('UP_RIGHT')
@@ -59,7 +59,9 @@ class Game:
                         directions.append('STAY')
                     agents.append(agent)
                     goals.append(goal)
+            print('Moving {} agents'.format(len(agents)))
             grid = grid.move(agents, directions, goals)
+            print('Grid : ', grid.print())
             self.time_grid.append(copy.copy(grid))
 
     def visualize(self):
@@ -70,7 +72,7 @@ class Game:
     def summary(self):
         # Show total utility and agent-specific utility
         for tgrid in greedy_game.time_grid:
-            tgrid.print()
+            pass #tgrid.print()
 
 def initialize_agents():
     np.random.seed(SEED_AGENT)

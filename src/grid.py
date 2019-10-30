@@ -3,6 +3,7 @@ from goal import Goal
 import math
 import matplotlib.pyplot as plt
 import numpy as np
+import copy
 
 
 # TODO : Improve method documentation
@@ -63,12 +64,14 @@ class Grid:
     def __update_agent_position_and_cost(self, agents, directions, goals):
         new_agents = []
 
+
         for agent, direction, goal in zip(agents, directions, goals):
-            if agent.hide:
-                agent.decrement_hide()
-                continue
+            #if agent.hide:
+            #    agent.decrement_hide()
+            #    continue
 
             self.update_agent_at_goal_state(agent, goal, goals)
+            init_position = agent.pos_x, agent.pos_y
 
             if 'UP' in direction:
                 agent.pos_x += 1
@@ -81,8 +84,9 @@ class Grid:
             if direction != 'STAY':
                 agent.cur_cost += self.__get_cost(agent, direction)
 
+            print('Agent {} moved from {},{} to {},{} (dir {} cost {} +{})'.format(agent.id, init_position[0], init_position[1], agent.pos_x, agent.pos_y, direction, agent.cur_cost, self.__get_cost(agent, direction)))
             new_agents.append(agent)
-            return new_agents
+        return new_agents
 
     def update_agent_at_goal_state(self, agent, goal, goals):
         # TODO : Rewrite this complex logic. If agent at goal state, stays hidden and reappears randomly. 
@@ -90,8 +94,8 @@ class Grid:
             capacity_utilization = abs(agent.capacity - goal.capacity)
             agent.cur_filled_capacity = capacity_utilization
 
-            agent.decrement_hide()
-            agent.hide = True
+            #agent.decrement_hide()
+            #agent.hide = True
 
             if capacity_utilization >= goal.capacity:
                 goals.remove(goal)
