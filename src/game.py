@@ -13,7 +13,8 @@ INITIAL_GOALS = 10
 MAX_AGENT_CAPACITY = 5
 MAX_GOAL_CAPACITY = 5
 
-SEED = 7
+SEED_AGENT = 7
+SEED_GOAL = 7
 
 TIMEOUT = 20
 
@@ -72,7 +73,7 @@ class Game:
             tgrid.print()
 
 def initialize_agents():
-    np.random.seed(SEED)
+    np.random.seed(SEED_AGENT)
     agents = []
     for _ in range(INITIAL_AGENTS):
         pos_x = np.random.randint(0, GRID_HEIGHT)
@@ -82,7 +83,7 @@ def initialize_agents():
     return agents
 
 def initialize_goals():
-    np.random.seed(SEED)
+    np.random.seed(SEED_GOAL)
     goals = []
     for _ in range(INITIAL_GOALS):
         pos_x = np.random.randint(0, GRID_HEIGHT)
