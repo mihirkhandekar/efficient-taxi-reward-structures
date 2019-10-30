@@ -63,7 +63,10 @@ class Game:
             print('Moving {} agents'.format(len(agents)))
             grid = grid.move(agents, directions, goals)
             print('Grid : ', grid.print())
+
+            grid.visualize()
             self.time_grid.append(copy.copy(prev_grid))
+
 
     def visualize(self):
         # Visualize all grids over time T
@@ -110,6 +113,6 @@ if __name__ == '__main__':
     nash_game = Game(init_grid, strategy=NashStrategy())
     epsilon = 0.000001
     print('Greedy Game :' , greedy_game.summary())
-    greedy_game.visualize()
+    
     print('Nash Game :' , nash_game.summary())
     print('Price of Anarchy : ', greedy_game.current_utility / (nash_game.current_utility + epsilon))
