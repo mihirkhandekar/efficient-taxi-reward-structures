@@ -126,28 +126,20 @@ class Grid:
 
     def visualize(self):
         # Visualizes current grid
-        l_x=[]
-        l_y=[]
-        g_x=[]
-        g_y=[]
+        
         numGoals=len(self.goals)
         numAgents=len(self.agents)
 
-        for agent in self.agents:
-            l_x.append(agent.pos_x)
-            l_y.append(agent.pos_y)
-        for goal in self.goals:
-            g_x.append(goal.pos_x)
-            g_y.append(goal.pos_y)
         alabels=[]
         glabels=[]
-        
-        gloc=[]
-        for i in range(numGoals):
-            gloc.append((g_x[i],g_y[i]))
         aloc=[]
-        for i in range(numAgents):
-            aloc.append((l_x[i],l_y[i]))
+        gloc=[]
+
+        for agent in self.agents:
+            aloc.append((agent.pos_x,agent.pos_y))
+        for goal in self.goals:
+            gloc.append((goal.pos_x,goal.pos_y))
+    
         gloc_s = set(gloc)
         aloc_s = set(aloc)
         acount=[]
@@ -172,23 +164,26 @@ class Grid:
             aloc_x.append(i[0])
             aloc_y.append(i[1])
 
-
+        
         for i in aloc_s:
             lab_a=""
             
-            for j in range(len(aloc)):
-                if i==aloc[j]:
+            for agent in self.agents:
+                
+                if agent.pos_x==i[0] and agent.pos_y==i[1]:
+                    
                     lab_a+="A"
-                    lab_a+=str(j)
+                    lab_a+=str(agent.id)
                     lab_a+=","
             alabels.append(lab_a)
         for i in gloc_s:
             
             lab_g=""
-            for j in range(len(gloc)):
-                if i == gloc[j]:
+            for goal in self.goals:
+                if goal.pos_x==i[0] and goal.pos_y==i[1]:
+                    
                     lab_g+="G"
-                    lab_g+=str(j)
+                    lab_g+=str(goal.id)
                     lab_g+=","
             if i in aloc_s:
                 lab_g+=alabels[aloc_s.index(i)]
