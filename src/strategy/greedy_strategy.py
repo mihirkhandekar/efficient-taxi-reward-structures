@@ -3,6 +3,7 @@ from config import DEBUG, SUPER_DEBUG
 
 class GreedyStrategy(Strategy):
     def get_strategy(self, grid):
+        print(grid.summary())
         # Uses agents and goals in grid and uses a custom method to return which agent which goal is assigned to.
         agent_assignments = dict()
         agent_assignments_ids = dict()
@@ -21,11 +22,13 @@ class GreedyStrategy(Strategy):
                 capacity_utilization = abs(agent.capacity - goal.capacity)
                 utility = goal.get_reward(
                     capacity_utilization) - grid.get_total_moving_cost(agent, goal)
+                print('Reward : {}, CU : {} cost : {}'.format(goal.get_reward(capacity_utilization), capacity_utilization, grid.get_total_moving_cost(agent, goal)))
                 if utility > max_utility:
                     max_utility = utility
                     best_goal = goal
                 if SUPER_DEBUG:
-                    print('Utility Agent {}, Goal {} = {}'.format(agent.id, goal.id, utility))
+                    print('Utility Agent {}, Goal {} = {}'.format(agent.summary(), goal.summary(), utility))
+
             if best_goal != None:
                 agent_assignments[agent] = best_goal
                 agent_assignments_ids[agent.id] = best_goal.id

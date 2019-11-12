@@ -7,26 +7,26 @@ from grid import Grid
 import copy
 from config import DEBUG, SUPER_DEBUG, GRID_WIDTH, GRID_HEIGHT
 
-INITIAL_AGENTS = 10
-INITIAL_GOALS = 10
-MAX_AGENT_CAPACITY = 5
-MAX_GOAL_CAPACITY = 5
+INITIAL_AGENTS = 30
+INITIAL_GOALS = 30
+MAX_AGENT_CAPACITY = 10
+MAX_GOAL_CAPACITY = 10
 
-SEED_AGENT = 7
-SEED_GOAL = 8
+SEED_AGENT = None
+SEED_GOAL = None
 
-TIMEOUT = 20
+TIMEOUT = 10
 
 class Game:
-    def __init__(self, init_grid, strategy=GreedyStrategy()):
-        self.init_grid = init_grid
-        self.time_grid = [copy.copy(init_grid)]
+    def __init__(self, i_grid, strategy=GreedyStrategy()):
+        self.init_grid = copy.deepcopy(i_grid)
+        self.time_grid = [copy.deepcopy(i_grid)]
         self.strategy = strategy
         self.current_utility = 0
 
     def generate_strategy_over_time(self):
         time = 0
-        grid = copy.copy(self.init_grid)
+        grid = copy.deepcopy(self.init_grid)
         grid.visualize()
 
         print('Time :', time)
@@ -71,7 +71,7 @@ class Game:
                     print('Agent {} to move {}'.format(move_agents[-1].id, move_directions[-1]))
 
             grid = grid.move(move_agents, move_directions, move_goals)
-            self.time_grid.append(copy.copy(grid))
+            self.time_grid.append(copy.deepcopy(grid))
 
             time += 1
             print('Time :', time)
@@ -83,15 +83,16 @@ class Game:
 
     def visualize(self):
         # Visualize all grids over time T
-        for tgrid in greedy_game.time_grid:
+        for tgrid in self.time_grid:
             tgrid.visualize()
 
     def summary(self):
         # Show total utility and agent-specific utility
+        
         grids = []
-        for tgrid in greedy_game.time_grid:
+        for tgrid in self.time_grid:
             grids.append(tgrid.summary())
-        return grids
+        return self.current_utility, grids
 
 
 def initialize_agents():
@@ -117,22 +118,53 @@ def initialize_goals():
 def initialize_grid(init_agents, goals):
     return Grid(grid_height=GRID_HEIGHT, grid_width=GRID_WIDTH, agents=init_agents, goals=goals)
     
+def get_agents_utility(game):
+    grid = game.time_grid[-1]
+    agents = grid.agents
+    return np.sum(np.array([agent.cur_utility for agent in agents]))
 
-if __name__ == '__main__':
-    # Initialize agents and goals randomly
+
+def get_goals_pending_cap(game):
+    grid = game.time_grid[-1]
+    goals = grid.goals
+    return np.sum(np.array([goal.capacity for goal in goals]))
+
+
+def simulate():
     init_agents = initialize_agents()
     goals = initialize_goals()
 
-    # Initialize grid with agents and goals
     init_grid = initialize_grid(init_agents, goals)
+
+    print(init_grid.summary())
     
     # Greedy game
     greedy_game = Game(init_grid, strategy=GreedyStrategy())
+    print('---------------------', greedy_game.summary())
     greedy_game.generate_strategy_over_time()
 
     nash_game = Game(init_grid, strategy=NashStrategy())
+    print('---------------------', nash_game.summary())
+    nash_game.generate_strategy_over_time()
     epsilon = 0.000001
-    print('Greedy Game utility:' , greedy_game.current_utility)
+
     
-    print('Nash Game utility:' , nash_game.current_utility)
-    print('Price of Anarchy : ', greedy_game.current_utility / (nash_game.current_utility + epsilon))
+    print('Greedy Game social cost:' , get_goals_pending_cap(greedy_game))
+    
+    print('Nash Game social cost:' , get_goals_pending_cap(nash_game))
+
+    poa = get_goals_pending_cap(greedy_game) / (get_goals_pending_cap(nash_game) + epsilon)
+
+    print('Price of Anarchy : ', poa)
+    return poa
+
+
+
+if __name__ == '__main__':
+    # Initialize agents and goals randomly
+    poas = []
+    for i in range(10):
+        poas.append(simulate())
+    print('POAS', poas)
+    print("AVERAGE POA", np.average(np.array(poas)))
+

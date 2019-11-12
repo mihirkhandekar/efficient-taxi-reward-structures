@@ -10,6 +10,7 @@ import copy
 
 # TODO : Improve method documentation
 class Grid:
+    STEP_COST = 2
     def __init__(self, time=0, grid_height=25, grid_width=25, agents=[], goals=[]):
         #TODO : Validate initial positions of agents and goals
         self.grid_height = grid_height
@@ -52,7 +53,7 @@ class Grid:
     def __get_cost(self, agent, direction):
         # This method gets cost for agent to move 1 step in a direction
         # Typically equal for all directions = 1
-        return 1
+        return self.STEP_COST
 
     def __merge_new_agent_positions_with_existing(self, new_agents):
         modified_positions = [new_agent.id for new_agent in new_agents]
@@ -74,9 +75,10 @@ class Grid:
                 new_agents.append(agent)
                 continue
 
-            updated_goals = self.update_agent_at_goal_state(agent, goal, goals)
-
-            all_updated_goals.update(updated_goals)
+            if goal is not None:
+                updated_goals = self.update_agent_at_goal_state(agent, goal, goals)
+                all_updated_goals.update(updated_goals)
+                
             init_position = agent.pos_x, agent.pos_y
             if 'UP' in direction:
                 agent.pos_x += 1
@@ -87,9 +89,9 @@ class Grid:
             if 'RIGHT' in direction:
                 agent.pos_y += 1
             if direction != 'STAY':
-                agent.cur_cost += self.__get_cost(agent, direction)
+                agent.cur_utility -= self.__get_cost(agent, direction)
             if DEBUG:
-                print('Agent {} moved {} from {},{} to {},{} (dir {} cost {} +{})'.format(agent.id, direction, init_position[0], init_position[1], agent.pos_x, agent.pos_y, direction, agent.cur_cost, self.__get_cost(agent, direction)))
+                print('Agent {} moved {} from {},{} to {},{} (dir {} cost {} +{})'.format(agent.id, direction, init_position[0], init_position[1], agent.pos_x, agent.pos_y, direction, agent.cur_utility, self.__get_cost(agent, direction)))
             
             new_agents.append(agent)
         return new_agents, all_updated_goals
@@ -105,6 +107,9 @@ class Grid:
             agent.cur_filled_capacity = capacity_utilization
             if DEBUG: print('Agent {} ({}) at goal {} ({})'.format(agent.id, agent.capacity, goal.id, goal.capacity))
             agent.hidden = True
+            capacity_utilization = abs(agent.capacity - goal.capacity)
+
+            agent.cur_utility += goal.get_reward(capacity_utilization)
 
             if capacity_utilization >= goal.capacity:
                 goals.remove(goal)
@@ -137,7 +142,7 @@ class Grid:
         x_diff = abs(agent.pos_x - goal.pos_x)
         y_diff = abs(agent.pos_y - goal.pos_y) 
         cost = abs(x_diff - y_diff) + min(x_diff, y_diff)
-        return cost
+        return self.STEP_COST * cost
 
     def visualize(self):
         # Visualizes current grid
