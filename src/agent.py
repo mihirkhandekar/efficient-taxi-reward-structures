@@ -7,6 +7,7 @@ class Agent:
         self.cur_utility = cur_utility
         self.id = id            #TODO : Global control of ID assignment
         self.cur_filled_capacity = cur_filled_capacity
+        self.cur_distance = 0
         self.hide_timeout = self.HIDE
         self.hidden = False
     

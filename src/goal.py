@@ -3,7 +3,7 @@ import numpy as np
 class Goal:
     
     MEDIAN_DISTANCE = 10
-    UNIT_REWARD = 3.0
+    UNIT_REWARD = 4.0
 
     def __init__(self, pos_x, pos_y, id = None, capacity=5, cur_cost = 0):
         self.pos_x = pos_x
@@ -16,8 +16,8 @@ class Goal:
         # Assuming average distance of Singapore travels with unit reward of UNIT_REWARD per unit. Consider with MEDIAN_DISTANCE as median in normal distribution
         # distance = np.random.normal(loc=self.MEDIAN_DISTANCE, scale=2, size=units)
         
-        distance = np.array([10. for i in range(units)])
-        return int(np.sum(self.UNIT_REWARD * distance))
+        # distance = np.array([10. for i in range(units)])
+        return (self.UNIT_REWARD * units * 10.)
 
     def summary(self):
         return ('Goal {} at ({}, {}) : Cap {}'.format(self.id, self.pos_x, self.pos_y, self.capacity))

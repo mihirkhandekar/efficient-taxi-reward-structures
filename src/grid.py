@@ -57,6 +57,8 @@ class Grid:
 
     def __merge_new_agent_positions_with_existing(self, new_agents):
         modified_positions = [new_agent.id for new_agent in new_agents]
+        full_agents = [new_agent.id for new_agent in new_agents if new_agent.capacity == new_agent.cur_filled_capacity]
+        
         for agent in self.agents:
             if agent.id not in modified_positions:
                 new_agents.append(agent)
@@ -66,19 +68,7 @@ class Grid:
         new_agents = []
 
         all_updated_goals = {}
-        for agent, direction, goal in zip(agents, directions, goals):
-            if agent.hidden:
-                reappear = agent.decrement_hide()
-                if reappear:
-                    agent.pos_x = np.random.randint(0, GRID_HEIGHT)
-                    agent.pos_y = np.random.randint(0, GRID_WIDTH)
-                new_agents.append(agent)
-                continue
-
-            if goal is not None:
-                updated_goals = self.update_agent_at_goal_state(agent, goal, goals)
-                all_updated_goals.update(updated_goals)
-                
+        for agent, direction, goal in zip(agents, directions, goals):                
             init_position = agent.pos_x, agent.pos_y
             if 'UP' in direction:
                 agent.pos_x += 1
@@ -90,37 +80,45 @@ class Grid:
                 agent.pos_y += 1
             if direction != 'STAY':
                 agent.cur_utility -= self.__get_cost(agent, direction)
+                agent.cur_distance += 1
             if DEBUG:
                 print('Agent {} moved {} from {},{} to {},{} (dir {} cost {} +{})'.format(agent.id, direction, init_position[0], init_position[1], agent.pos_x, agent.pos_y, direction, agent.cur_utility, self.__get_cost(agent, direction)))
             
+            if goal is not None:
+                updated_goals, agent = self.update_agent_at_goal_state(agent, goal, goals)
+                all_updated_goals.update(updated_goals)
             new_agents.append(agent)
         return new_agents, all_updated_goals
 
     def update_agent_at_goal_state(self, agent, goal, goals):
         # TODO : Rewrite this complex logic. If agent at goal state, stays hidden and reappears randomly. 
         updated_goals = {}
-        if agent.hidden:
-            return updated_goals
-        
         if agent.pos_x == goal.pos_x and agent.pos_y == goal.pos_y:
-            capacity_utilization = abs(agent.capacity - goal.capacity)
-            agent.cur_filled_capacity = capacity_utilization
+            
+            capacity_utilization = min(agent.capacity - agent.cur_filled_capacity, goal.capacity)
+            
+            agent.cur_filled_capacity = agent.cur_filled_capacity + capacity_utilization
+            
             if DEBUG: print('Agent {} ({}) at goal {} ({})'.format(agent.id, agent.capacity, goal.id, goal.capacity))
-            agent.hidden = True
-            capacity_utilization = abs(agent.capacity - goal.capacity)
 
             agent.cur_utility += goal.get_reward(capacity_utilization)
 
-            if capacity_utilization >= goal.capacity:
-                goals.remove(goal)
+            if agent.capacity == agent.cur_filled_capacity:
+                agent.hidden = True
+
+            if capacity_utilization == goal.capacity:
+                for sgoal in self.goals:
+                    if sgoal.id == goal.id:
+                        self.goals.remove(sgoal)
+                #self.goals.remove(goal)
                 updated_goals[goal] = None
             else:
                 goal.capacity -= capacity_utilization
                 updated_goals[goal] = goal.capacity
         
         
-        if DEBUG: print('Updating reached goals : ', updated_goals)
-        return updated_goals
+        if DEBUG: print('Updating reached goals : ', [updated_goal.summary() for updated_goal in updated_goals])
+        return updated_goals, agent
 
     def __validate_move(self, agents, directions, goals):
         if len(agents) != len(directions) or len(agents) != len(goals):
@@ -141,7 +139,8 @@ class Grid:
         # Get cost to move agent from its current position to passed goal
         x_diff = abs(agent.pos_x - goal.pos_x)
         y_diff = abs(agent.pos_y - goal.pos_y) 
-        cost = abs(x_diff - y_diff) + min(x_diff, y_diff)
+        # cost = abs(x_diff - y_diff) + min(x_diff, y_diff)
+        cost = max(x_diff, y_diff)
         return self.STEP_COST * cost
 
     def visualize(self):
