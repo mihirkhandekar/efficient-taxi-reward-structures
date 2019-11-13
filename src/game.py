@@ -7,9 +7,10 @@ from grid import Grid
 import copy
 from config import DEBUG, SUPER_DEBUG, GRID_WIDTH, GRID_HEIGHT
 from strategy.central_planner import CentralPlanner
+import time
 
-INITIAL_AGENTS = 4
-INITIAL_GOALS = 4
+INITIAL_AGENTS = 8
+INITIAL_GOALS = 8
 MAX_AGENT_CAPACITY = 10
 MAX_GOAL_CAPACITY = 10
 
@@ -154,18 +155,23 @@ def simulate():
 
     init_grid = initialize_grid(init_agents, goals)
 
+    st = time.time()
     cp_strategy = CentralPlanner().get_strategy(copy.deepcopy(init_grid))
-
+    print('CP time : ', time.time() - st)
     print(init_grid.summary())
     
     # Greedy game
+    st = time.time()
     greedy_game = Game(init_grid, strategy=GreedyStrategy())
     print('---------------------', greedy_game.summary())
     greedy_time = greedy_game.generate_strategy_over_time()
+    print('Greedy time : ', time.time() - st)
 
+    st = time.time()
     nash_game = Game(init_grid, strategy=OptStrategy())
     print('---------------------', nash_game.summary())
     nash_time = nash_game.generate_strategy_over_time()
+    print('CUMAX time : ', time.time() - st)
     epsilon = 0.000001
 
     
@@ -177,27 +183,22 @@ def simulate():
 
     poa = get_agents_utility(greedy_game) / (get_agents_utility(nash_game) + epsilon)
 
-    timediff = greedy_time/nash_time
+    #timediff = greedy_time/nash_time
 
-    print('Price of Anarchy : ', poa)
-    return poa, timediff, get_agents_distance(greedy_game)/get_agents_distance(nash_game)
+    #print('Price of Anarchy : ', poa)
+    return get_agents_distance(greedy_game), get_agents_distance(nash_game), cp_strategy
 
 
 
 if __name__ == '__main__':
     # Initialize agents and goals randomly
-    poas = []
-    times = []
-    distdiffs = []
+    greedy_dists = []
+    opt_dists = []
+    cps = []
     for i in range(1):
-        poa, timediff, distdiff = simulate()
-        poas.append(poa)
-        times.append(timediff)
-        distdiffs.append(distdiff)
-    print('POAS', poas)
-    print("AVERAGE POA", np.average(np.array(poas)))
-    print('TIMES', times)
-    print("AVERAGE TIME", np.average(np.array(times)))
-    print('DISTS', distdiffs)
-    print("AVERAGE DIST", np.average(np.array(distdiffs)))
+        greedy_dist, opt_dist, cp = simulate()
+        greedy_dists.append(greedy_dist)
+        opt_dists.append(opt_dist)
+        cps.append(cp)
 
+    print('Greedy : {}, Optimal : {}, Central Planner : {}'.format(np.average(greedy_dists), np.average(opt_dists), np.average(cps)))

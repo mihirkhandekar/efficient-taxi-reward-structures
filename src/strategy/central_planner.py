@@ -7,12 +7,14 @@ class CentralPlanner():
         agents = grid.agents
         goals = grid.goals
         print(grid.summary())
-        permutations = itertools.permutations(goals)
+        goal_permutations = itertools.permutations(goals)
+        agent_permutations = itertools.permutations(agents)
         #print('Permutations', [permutation for permutation in permutations])
+
         distances = []
-        for permutation in permutations:
-            print('++++')
-            distances.append(self.get_moving_distance(copy.deepcopy(agents), copy.deepcopy(permutation)))
+        for goal_permutation in goal_permutations:
+            for agent_permutation in agent_permutations:
+                distances.append(self.get_moving_distance(copy.deepcopy(agent_permutation), copy.deepcopy(goal_permutation)))
         print('DISTANCES', distances)
         return np.min(distances)
 
@@ -22,7 +24,6 @@ class CentralPlanner():
         new_goals = []
 
         for agent, goal in zip(agents, goals):
-            print('+cost ', self.get_total_moving_cost(agent, goal))
             distance += self.get_total_moving_cost(agent, goal)
             agent_seats = agent.capacity-agent.cur_filled_capacity
             if agent_seats == goal.capacity:
@@ -38,12 +39,14 @@ class CentralPlanner():
                 new_goals.append(goal)
 
         if len(new_agents) > 0 and len(new_goals) > 0:
-            permutations = itertools.permutations(new_goals)
+            goal_permutations = itertools.permutations(new_goals)
+            agent_permutations = itertools.permutations(new_agents)
             min_dist = np.inf
-            for permutation in permutations:
-                dist = self.get_moving_distance(copy.deepcopy(agents), copy.deepcopy(permutation))
-                if dist < min_dist:
-                    min_dist = dist
+            for goal_permutation in goal_permutations:
+                for agent_permutation in agent_permutations:
+                    dist = self.get_moving_distance(copy.deepcopy(agent_permutation), copy.deepcopy(goal_permutation))
+                    if dist < min_dist:
+                        min_dist = dist
             return distance + min_dist
         return distance
 
