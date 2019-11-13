@@ -18,7 +18,7 @@ class OptStrategy(Strategy):
         agents = grid.agents
         goals = grid.goals
         for agent in agents:
-            max_utility = 0#-np.inf
+            max_utility = 0 #-np.inf
             best_goal = None
             if agent.hidden:
                 agent_assignments_ids[agent.id] = None

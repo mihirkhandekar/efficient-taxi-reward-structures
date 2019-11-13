@@ -6,9 +6,10 @@ from goal import Goal
 from grid import Grid
 import copy
 from config import DEBUG, SUPER_DEBUG, GRID_WIDTH, GRID_HEIGHT
+from strategy.central_planner import CentralPlanner
 
-INITIAL_AGENTS = 10
-INITIAL_GOALS = 10
+INITIAL_AGENTS = 4
+INITIAL_GOALS = 4
 MAX_AGENT_CAPACITY = 10
 MAX_GOAL_CAPACITY = 10
 
@@ -150,7 +151,10 @@ def simulate():
     init_agents = initialize_agents()
     goals = initialize_goals()
 
+
     init_grid = initialize_grid(init_agents, goals)
+
+    cp_strategy = CentralPlanner().get_strategy(copy.deepcopy(init_grid))
 
     print(init_grid.summary())
     
@@ -169,6 +173,8 @@ def simulate():
     
     print('Nash Game social cost:' , get_agents_utility(nash_game), nash_time, get_goals_pending_cap(nash_game), get_agents_distance(nash_game))
 
+    print('Central Planner:' , cp_strategy)
+
     poa = get_agents_utility(greedy_game) / (get_agents_utility(nash_game) + epsilon)
 
     timediff = greedy_time/nash_time
@@ -183,7 +189,7 @@ if __name__ == '__main__':
     poas = []
     times = []
     distdiffs = []
-    for i in range(20):
+    for i in range(1):
         poa, timediff, distdiff = simulate()
         poas.append(poa)
         times.append(timediff)

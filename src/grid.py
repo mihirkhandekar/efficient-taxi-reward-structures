@@ -1,6 +1,7 @@
 from agent import Agent
 from goal import Goal
 from config import GRID_HEIGHT, GRID_WIDTH, DEBUG
+from strategy.central_planner import CentralPlanner
 
 import math
 import matplotlib.pyplot as plt
@@ -291,10 +292,15 @@ if __name__ == '__main__':
     goal1 = Goal(pos_x = 5, pos_y = 5, capacity=10)
     goal2 = Goal(pos_x = 5, pos_y = 5, capacity=10)
 
-    grid = Grid(agents=[agent1, agent2], goals=[goal1, goal2], first=True)
-    print('Initial grid')
-    print(grid.summary())
-    grid = grid.move([agent1], ['UP'], [goal1])
-    print('Final grid')
-    print(grid.summary())
+    grid = Grid(agents=[agent1, agent2], goals=[goal1, goal2])
+    '''    print('Initial grid')
+        print(grid.summary())
+        grid = grid.move([agent1], ['UP'], [goal1])
+        print('Final grid')
+        print(grid.summary())
+    '''
+    central_planner = CentralPlanner()
+    central_planner.get_strategy(grid)
+
+
 
