@@ -13,8 +13,14 @@ class CentralPlanner():
 
         distances = []
         for goal_permutation in goal_permutations:
-            for agent_permutation in agent_permutations:
-                distances.append(self.get_moving_distance(copy.deepcopy(agent_permutation), copy.deepcopy(goal_permutation)))
+            distances.extend(
+                self.get_moving_distance(
+                    copy.deepcopy(agent_permutation),
+                    copy.deepcopy(goal_permutation),
+                )
+                for agent_permutation in agent_permutations
+            )
+
         print('DISTANCES', distances)
         return np.min(distances)
 
@@ -38,7 +44,7 @@ class CentralPlanner():
                 goal.capacity -= agent_seats
                 new_goals.append(goal)
 
-        if len(new_agents) > 0 and len(new_goals) > 0:
+        if new_agents and new_goals:
             goal_permutations = itertools.permutations(new_goals)
             agent_permutations = itertools.permutations(new_agents)
             min_dist = np.inf
@@ -53,6 +59,5 @@ class CentralPlanner():
 
     def get_total_moving_cost(self, agent, goal):
         x_diff = abs(agent.pos_x - goal.pos_x)
-        y_diff = abs(agent.pos_y - goal.pos_y) 
-        cost = max(x_diff, y_diff)
-        return cost
+        y_diff = abs(agent.pos_y - goal.pos_y)
+        return max(x_diff, y_diff)

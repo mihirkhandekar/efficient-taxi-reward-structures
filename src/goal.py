@@ -20,7 +20,7 @@ class Goal:
         return (self.UNIT_REWARD * units * 10.)
 
     def summary(self):
-        return ('Goal {} at ({}, {}) : Cap {}'.format(self.id, self.pos_x, self.pos_y, self.capacity))
+        return f'Goal {self.id} at ({self.pos_x}, {self.pos_y}) : Cap {self.capacity}'
 
 if __name__ == '__main__':
     goal = Goal(0, 0, 0)
