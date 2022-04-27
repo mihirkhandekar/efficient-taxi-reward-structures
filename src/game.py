@@ -34,14 +34,14 @@ class Game:
         print('Time :', time)
         print('Grid :', grid.summary())
 
-        
+
         while(len(grid.goals) > 0 and len(grid.agents) > 0 and time < TIMEOUT):
             agent_assignments = self.strategy.get_strategy(grid)
 
             move_directions = []
             move_agents = []
             move_goals = []
-            
+
             self.__extract_move_directions_from_strategy(agent_assignments, move_directions, move_agents, move_goals)
 
             if all(direction=='STAY' for direction in move_directions):
@@ -55,40 +55,39 @@ class Game:
             print('Grid :', grid.summary())
             grid.visualize()
 
-        print('Stopping all agents with {} goals and {}/{} time. Agent can now think of other career options.'.format(len(grid.goals), time, TIMEOUT))
+        print(
+            f'Stopping all agents with {len(grid.goals)} goals and {time}/{TIMEOUT} time. Agent can now think of other career options.'
+        )
+
         return time
 
     def __extract_move_directions_from_strategy(self, agent_assignments, move_directions, move_agents, move_goals):
         for agent, goal in agent_assignments.items():
-            if goal != None:
-                if agent.pos_x < goal.pos_x and agent.pos_y < goal.pos_y:
-                    move_directions.append('UP_RIGHT')
-                elif agent.pos_x < goal.pos_x and agent.pos_y > goal.pos_y:
-                    move_directions.append('UP_LEFT')
-                elif agent.pos_x > goal.pos_x and agent.pos_y > goal.pos_y and agent.pos_x > 0 and agent.pos_y > 0:
-                    move_directions.append('DOWN_LEFT')
-                elif agent.pos_x > goal.pos_x and agent.pos_y < goal.pos_y and agent.pos_x > 0:
-                    move_directions.append('DOWN_RIGHT')
-                elif agent.pos_x > goal.pos_x and agent.pos_y == goal.pos_y and agent.pos_x > 0:
-                    move_directions.append('DOWN')
-                elif agent.pos_x < goal.pos_x and agent.pos_y == goal.pos_y:
-                    move_directions.append('UP')
-                elif agent.pos_x == goal.pos_x and agent.pos_y > goal.pos_y and agent.pos_y > 0:
-                    move_directions.append('LEFT')
-                elif agent.pos_x == goal.pos_x and agent.pos_y < goal.pos_y:
-                    move_directions.append('RIGHT')
-                else:
-                    move_directions.append('STAY')
-                move_agents.append(agent)
-                move_goals.append(goal)
-
+            if goal is None:
+                move_directions.append('STAY')
+            elif agent.pos_x < goal.pos_x and agent.pos_y < goal.pos_y:
+                move_directions.append('UP_RIGHT')
+            elif agent.pos_x < goal.pos_x and agent.pos_y > goal.pos_y:
+                move_directions.append('UP_LEFT')
+            elif agent.pos_x > goal.pos_x and agent.pos_y > goal.pos_y and agent.pos_x > 0 and agent.pos_y > 0:
+                move_directions.append('DOWN_LEFT')
+            elif agent.pos_x > goal.pos_x and agent.pos_y < goal.pos_y and agent.pos_x > 0:
+                move_directions.append('DOWN_RIGHT')
+            elif agent.pos_x > goal.pos_x and agent.pos_y == goal.pos_y and agent.pos_x > 0:
+                move_directions.append('DOWN')
+            elif agent.pos_x < goal.pos_x and agent.pos_y == goal.pos_y:
+                move_directions.append('UP')
+            elif agent.pos_x == goal.pos_x and agent.pos_y > goal.pos_y and agent.pos_y > 0:
+                move_directions.append('LEFT')
+            elif agent.pos_x == goal.pos_x and agent.pos_y < goal.pos_y:
+                move_directions.append('RIGHT')
             else:
                 move_directions.append('STAY')
-                move_agents.append(agent)
-                move_goals.append(goal)
+            move_agents.append(agent)
+            move_goals.append(goal)
 
             if SUPER_DEBUG:
-                print('Agent {} to move {}'.format(move_agents[-1].id, move_directions[-1]))
+                print(f'Agent {move_agents[-1].id} to move {move_directions[-1]}')
 
 
     def visualize(self):
@@ -98,10 +97,8 @@ class Game:
 
     def summary(self):
         # Show total utility and agent-specific utility
-        
-        grids = []
-        for tgrid in self.time_grid:
-            grids.append(tgrid.summary())
+
+        grids = [tgrid.summary() for tgrid in self.time_grid]
         return self.current_utility, grids
 
 
@@ -195,10 +192,12 @@ if __name__ == '__main__':
     greedy_dists = []
     opt_dists = []
     cps = []
-    for i in range(1):
+    for _ in range(1):
         greedy_dist, opt_dist, cp = simulate()
         greedy_dists.append(greedy_dist)
         opt_dists.append(opt_dist)
         cps.append(cp)
 
-    print('Greedy : {}, Optimal : {}, Central Planner : {}'.format(np.average(greedy_dists), np.average(opt_dists), np.average(cps)))
+    print(
+        f'Greedy : {np.average(greedy_dists)}, Optimal : {np.average(opt_dists)}, Central Planner : {np.average(cps)}'
+    )

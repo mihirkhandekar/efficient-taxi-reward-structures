@@ -36,13 +36,17 @@ class Grid:
 
         self.__merge_new_agent_positions_with_existing(new_agents)
 
-        new_grid = Grid(self.time + 1, self.grid_height,
-                        self.grid_width, new_agents, self.goals)
-        return new_grid
+        return Grid(
+            self.time + 1,
+            self.grid_height,
+            self.grid_width,
+            new_agents,
+            self.goals,
+        )
 
     def __update_goals(self, updated_goals, goals):
         for updated_goal, capacity in updated_goals.items():
-            if capacity == None or capacity <= 0:
+            if capacity is None or capacity <= 0:
                 for goal in self.goals:
                     if goal.id == updated_goal.id:
                         self.goals.remove(goal)
@@ -69,7 +73,7 @@ class Grid:
         new_agents = []
 
         all_updated_goals = {}
-        for agent, direction, goal in zip(agents, directions, goals):                
+        for agent, direction, goal in zip(agents, directions, goals):            
             init_position = agent.pos_x, agent.pos_y
             if 'UP' in direction:
                 agent.pos_x += 1
@@ -83,11 +87,14 @@ class Grid:
                 agent.cur_utility -= self.__get_cost(agent, direction)
                 agent.cur_distance += 1
             if DEBUG:
-                print('Agent {} moved {} from {},{} to {},{} (dir {} cost {} +{})'.format(agent.id, direction, init_position[0], init_position[1], agent.pos_x, agent.pos_y, direction, agent.cur_utility, self.__get_cost(agent, direction)))
-            
+                print(
+                    f'Agent {agent.id} moved {direction} from {init_position[0]},{init_position[1]} to {agent.pos_x},{agent.pos_y} (dir {direction} cost {agent.cur_utility} +{self.__get_cost(agent, direction)})'
+                )
+
+
             if goal is not None:
                 updated_goals, agent = self.update_agent_at_goal_state(agent, goal, goals)
-                all_updated_goals.update(updated_goals)
+                all_updated_goals |= updated_goals
             new_agents.append(agent)
         return new_agents, all_updated_goals
 
@@ -97,10 +104,14 @@ class Grid:
         if agent.pos_x == goal.pos_x and agent.pos_y == goal.pos_y:
             
             capacity_utilization = min(agent.capacity - agent.cur_filled_capacity, goal.capacity)
-            
+
             agent.cur_filled_capacity = agent.cur_filled_capacity + capacity_utilization
-            
-            if DEBUG: print('Agent {} ({}) at goal {} ({})'.format(agent.id, agent.capacity, goal.id, goal.capacity))
+
+            if DEBUG:
+                print(
+                    f'Agent {agent.id} ({agent.capacity}) at goal {goal.id} ({goal.capacity})'
+                )
+
 
             agent.cur_utility += goal.get_reward(capacity_utilization)
 
@@ -116,8 +127,8 @@ class Grid:
             else:
                 goal.capacity -= capacity_utilization
                 updated_goals[goal] = goal.capacity
-        
-        
+
+
         if DEBUG: print('Updating reached goals : ', [updated_goal.summary() for updated_goal in updated_goals])
         return updated_goals, agent
 
@@ -133,8 +144,7 @@ class Grid:
 
         for agent, direction in zip(agents, directions):
             if (agent.pos_x == 0 and 'DOWN' in direction) or (agent.pos_y == 0 and 'LEFT' in direction) or (agent.pos_x == self.grid_height - 1 and 'UP' in direction) or (agent.pos_y == self.grid_width - 1 and 'RIGHT' in direction):
-                raise ValueError(
-                    '{} is an invalid value for agent {}'.format(direction, agent))
+                raise ValueError(f'{direction} is an invalid value for agent {agent}')
 
     def get_total_moving_cost(self, agent, goal):
         # Get cost to move agent from its current position to passed goal
@@ -228,9 +238,9 @@ class Grid:
             text = "{}, {}".format(" ".join(list(map(str,ind["ind"]))), 
                                 " ".join([names[n] for n in ind["ind"]]))
             '''
-            text = "Goals/Agents: {}".format(" ".join([names[n] for n in ind["ind"]]))
+            text = f'Goals/Agents: {" ".join([names[n] for n in ind["ind"]])}'
             #----------
-            
+
             annot.set_text(text)
             #annot.get_bbox_patch().set_facecolor(cmap(norm(c[ind["ind"][0]])))
             annot.get_bbox_patch().set_alpha(0.4)
@@ -243,9 +253,9 @@ class Grid:
             text = "{}, {}".format(" ".join(list(map(str,ind["ind"]))), 
                                 " ".join([names[n] for n in ind["ind"]]))
             '''
-            text = "Goals/Agents: {}".format(" ".join([names1[n] for n in ind["ind"]]))
+            text = f'Goals/Agents: {" ".join([names1[n] for n in ind["ind"]])}'
             #----------
-            
+
             annot.set_text(text)
             #annot.get_bbox_patch().set_facecolor(cmap(norm(c[ind["ind"][0]])))
             annot.get_bbox_patch().set_alpha(0.4)
@@ -257,19 +267,17 @@ class Grid:
                     update_annot(ind)
                     annot.set_visible(True)
                     fig.canvas.draw_idle()
-                else:
-                    if vis:
-                        annot.set_visible(False)
-                        fig.canvas.draw_idle()
+                elif vis:
+                    annot.set_visible(False)
+                    fig.canvas.draw_idle()
                 cont, ind = sc1.contains(event)
                 if cont:
                     update_annot1(ind)
                     annot.set_visible(True)
                     fig.canvas.draw_idle()
-                else:
-                    if vis:
-                        annot.set_visible(False)
-                        fig.canvas.draw_idle()
+                elif vis:
+                    annot.set_visible(False)
+                    fig.canvas.draw_idle()
 
         fig.canvas.mpl_connect("motion_notify_event", hover)
                 

@@ -12,8 +12,8 @@ class OptStrategy(Strategy):
 
 
     def get_strategy(self, grid):
-        agent_assignments = dict()
-        agent_assignments_ids = dict()
+        agent_assignments = {}
+        agent_assignments_ids = {}
 
         agents = grid.agents
         goals = grid.goals
@@ -32,17 +32,20 @@ class OptStrategy(Strategy):
                     max_utility = utility
                     best_goal = goal
                 if SUPER_DEBUG:
-                    print('Utility Agent {}, Goal {} = {}'.format(agent.summary(), goal.summary(), utility))
+                    print(f'Utility Agent {agent.summary()}, Goal {goal.summary()} = {utility}')
             if best_goal != None:
                 agent_assignments[agent] = best_goal
                 agent_assignments_ids[agent.id] = best_goal.id
                 if SUPER_DEBUG:
-                    print('Best utility for agent {} in goal {}'.format(agent.id, best_goal.id))
+                    print(f'Best utility for agent {agent.id} in goal {best_goal.id}')
             else:
                 agent_assignments_ids[agent.id] = None
                 agent_assignments[agent] = None
                 if SUPER_DEBUG:
-                    print('All goals negative for agent {}. Agent has nowhere to go now. '.format(agent.id))
+                    print(
+                        f'All goals negative for agent {agent.id}. Agent has nowhere to go now. '
+                    )
+
 
         if DEBUG:
             print('Agent-Goal assignments : ', agent_assignments_ids)

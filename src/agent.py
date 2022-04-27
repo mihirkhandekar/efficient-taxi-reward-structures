@@ -32,4 +32,4 @@ class Agent:
     
 
     def summary(self):
-        return ('Agent {} at ({}, {}) : Cap {}/{} : Current Utility {} '.format(self.id, self.pos_x, self.pos_y, self.cur_filled_capacity, self.capacity, self.cur_utility))
+        return f'Agent {self.id} at ({self.pos_x}, {self.pos_y}) : Cap {self.cur_filled_capacity}/{self.capacity} : Current Utility {self.cur_utility} '
